@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="scripts/plotly-latest.min.js"></script>
+        <script src="scripts/main.js"></script>
+        <link href="styles.css" rel="stylesheet">
+        <title>Global optimization project</title>
+    </head>
+    <body>
+        <div id="plotly-container"></div>
+        
+        <form id="interface-container">
+            <div id="returned-data">
+                <div id="result"></div>
+                <div id="for-debug"></div>
+            </div>
+            <div id="method-selector-container">
+                <input id="method-hj" type="radio" name="method-selector" value="hj" checked>
+                <label for="method-hj">Hooke-Jeeves</label>
+                <input id="method-sa" type="radio" name="method-selector" value="sa">
+                <label for="method-sa">Simulated annealing</label>
+            </div>
+            <div id="function-selector-container">
+                <input id="function-default" type="radio" name="function-selector" value="default" checked>
+                <label for="function-default">Default function</label>
+                <input id="function-bill" type="radio" name="function-selector" value="bill">
+                <label for="function-bill">Bill function</label>
+                <input id="function-vitte" type="radio" name="function-selector" value="vitte">
+                <label for="function-vitte">Vitte function</label>
+            </div>
+            <!-- <div id="parameter-selector-container">
+                <input type="text" id="params" name="name" required minlength="4" maxlength="8" size="10">
+                <label for="params">params</label>
+                <input type="text" name="name" readonly minlength="4" maxlength="8" size="10">
+            </div> -->
+            <div id="button-container">
+                <button id="button-start" type="button">Start</button>
+            </div>
+        </form>
+        
+        <script>
+            function GetPlot(returned){
+                let graphDiv=document.getElementById("plotly-container");
+                let X,Y,Z,minX,minY,x1,y1,fMin,labelsList,minZ;
+                X=returned[0];
+                Y=returned[1];
+                Z=returned[2];
+                minX=returned[3];
+                minY=returned[4];
+                x1=returned[5];
+                y1=returned[6];
+                fMin=returned[7];
+                labelsList=returned[8];
+                let resultDiv = document.getElementById("result");
+                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>iterations = "+minX.length;
+                let contourPlot={
+                x:X,
+                y:Y,
+                z:Z,
+                type:"contour",
+                contours: { start: fMin-20, end: fMin+100, size:10 } 
+                };
+                let scatterPlot={
+                    x: minX,
+                    y: minY,
+                    type: "scatter",
+                    line: { color: "red" },
+                    marker: { width: 5 },
+                    text: labelsList,
+                    textposition: "top center",
+                    mode:'lines+markers+text',
+                    textfont: { color: "yellow" },
+                    hoverinfo: "x+y+z"
+                };
+                let data = [scatterPlot,contourPlot];
+                let layout={
+                    margin: { t: 10 },
+                    hovermode: "closest" };
+                Plotly.newPlot( graphDiv, data,layout);
+            }
+            let returned;
+            let interfaceForm = document.getElementById("interface-container");
+            let btnStart = document.getElementById("button-start");
+            btnStart.addEventListener("click",function(event){ 
+                let data = new FormData(interfaceForm);
+                for (item of data) {
+                    if (item[0] === "method-selector"){
+                        selectedMethod=item[1];
+                    }
+                    else {
+                        selectedFunction=item[1];
+                    }
+                }
+                if (selectedMethod === "hj"){
+                    returned = StartHJ(selectedFunction);
+                }
+                else {
+                    returned = StartSA(selectedFunction);
+                }
+                GetPlot(returned);
+            });
+            
+        </script>
+    </body>
+</html>
