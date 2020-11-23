@@ -14,19 +14,23 @@ function VittesFunc(x1,x2) {
     let o =Math.pow(10,-4)*(x1-3)*(x1-3)-(x2-x1);
     return o+e;
 }
-
+function RosenbrockFunc(x1,x2){
+    return 100*(x2 - x1**2)**2 + (1 - x1)**2;
+}
 function HookeJeeves (x1,x2,mx,f) {
     let minX=[];
     let minY=[];
     minX.push(x1);
     minY.push(x2);
     let n=2;
+    let functionIter = 0;
     let y=f(x1,x2);
-    let k=0;
+    functionIter++;
+    let methodIter = 0;
     let d=1;
-    let eps=1e-4;
+    let eps=1e-2;
 
-    while ((d > eps) && (k < mx)) {
+    while ((d > eps) && (methodIter < mx)) {
         let fl=false;
         let sign = 1;
         for (let i = 0; i<n;i++) {   
@@ -35,6 +39,7 @@ function HookeJeeves (x1,x2,mx,f) {
             }
             x1=x1+sign*d;
             let fX=f(x1,x2);
+            functionIter++;
             if (fX < y){
                 y=fX;
                 fl=true;
@@ -52,6 +57,7 @@ function HookeJeeves (x1,x2,mx,f) {
             }
             x2=x2+sign*d;
             fX=f(x1,x2);
+            functionIter++;
             if (fX < y){
                 y=fX;
                 fl=true;
@@ -65,9 +71,9 @@ function HookeJeeves (x1,x2,mx,f) {
         if (fl===false){
             d=d/2;
         }
-        k++;
+        methodIter++;
     }
-    return [x1,x2,minX,minY];
+    return [x1,x2,minX,minY,methodIter,functionIter];
 }
 function GetProbability(E,T){
     return Math.exp(-E/T);
@@ -86,64 +92,58 @@ function DecreaseTemperature(T,i){
 function GetRandomBetween(min, max) {
     return Math.random() * (max - min) + min;
 }
-function SimulatedAnnealing(initialTemperature,endT,kMax,x0,y0,f){
+function SimulatedAnnealing(initialTemperature,endT,kMax,x0,y0,f,lowerBound,upperBound){
+    let functionIter = 0;
     let T, currentEnergy;
     let initialEnergy = f(x0,y0);
+    functionIter++;
     let minX=[];
     let minY=[];
-    let minXBest=[];
-    let minYBest=[];
-    let x1Best,x2Best,fMinBest;
     let candidateEnergy, p;
-    let lowerX = x0 - 1.5;
+    //searching square 3x3 with center in (x0,y0)
+    /*let lowerX = x0 - 1.5;
     let upperX = x0 + 1.5;
     let lowerY = y0 - 1.5;
-    let upperY = y0 + 1.5;
-    for (let j = 1; j<=10;j++) {  
-        T=initialTemperature;
-        currentEnergy=initialEnergy;
-        minX=[];
-        minY=[];
-        minX.push(x0);
-        minY.push(y0);
-        for (let i = 1; i<=kMax;i++) {  
-            x1 = GetRandomBetween(lowerX, upperX);
-            y1 = GetRandomBetween(lowerY, upperY);
-            candidateEnergy=f(x1,y1);
-            if (candidateEnergy<currentEnergy-1e-8){
+    let upperY = y0 + 1.5;*/
+    let lowerX = lowerY = lowerBound;
+    let upperX = upperY = upperBound;
+    
+    T=initialTemperature;
+    currentEnergy=initialEnergy;
+    minX=[];
+    minY=[];
+    minX.push(x0);
+    minY.push(y0);
+    for (var i = 0; i<kMax;i++) {  
+        x1 = GetRandomBetween(lowerX, upperX);
+        y1 = GetRandomBetween(lowerY, upperY);
+        candidateEnergy=f(x1,y1);
+        functionIter++;
+        if (candidateEnergy<currentEnergy-1e-8){
+            currentEnergy=candidateEnergy;
+            minX.push(x1);
+            minY.push(y1);
+        }
+        else {
+            p=GetProbability(candidateEnergy-currentEnergy,T);
+            if (MakeChange(p)===true){
                 currentEnergy=candidateEnergy;
                 minX.push(x1);
                 minY.push(y1);
             }
-            else {
-                p=GetProbability(candidateEnergy-currentEnergy,T);
-                if (MakeChange(p)===true){
-                    currentEnergy=candidateEnergy;
-                    minX.push(x1);
-                    minY.push(y1);
-                }
-            }
-            T=DecreaseTemperature(initialTemperature,i);
-            if (T < endT+1e-8){
-                break;
-            }
         }
-        x1 = minX[minX.length - 1];
-        y1 = minY[minY.length - 1];
-        fMin = f(x1,y1);
-        if ((fMin < fMinBest - 1e-8) || (j === 1) ){
-            fMinBest = fMin;
-            minXBest = minX;
-            minYBest = minY;
+        T=DecreaseTemperature(initialTemperature,i);
+        if (T < endT+1e-8){
+            break;
         }
     }
-    x1Best = minXBest[minXBest.length - 1];
-    x2Best = minYBest[minYBest.length - 1];
-    return [x1Best,x2Best,minXBest,minYBest];
+    x1 = minX[minX.length - 1];
+    y1 = minY[minY.length - 1];
+    return [x1,y1,minX,minY,i,functionIter];
 }
 function GetAxisBounds(x0,y0,x1,y1){
     let eps=1e-8;
-    let shiftingValue = 10;
+    let shiftingValue = 3;
     let lowerX,upperX,lowerY,upperY;
     if (x1 < x0 + eps){
         lowerX = x1-shiftingValue;
@@ -207,127 +207,105 @@ function GetTargetFunction(selectedFunctionString){
         if (selectedFunctionString === "bill"){
             targetFunction=BillsFunc;
         }
-        else{
-            targetFunction=VittesFunc;
+        else {
+            if (selectedFunctionString === "vitte"){
+                targetFunction=VittesFunc;
+            }
+            else {
+                if (selectedFunctionString === "rosen"){
+                    targetFunction=RosenbrockFunc;
+                }
+            } 
         }
     }
     return targetFunction;
 }
-function StartHJ(selectedFunctionString){
-    let log = document.getElementById("for-debug");
-    log.innerHTML = "HJ, "+selectedFunctionString;
-    let targetFunction = GetTargetFunction(selectedFunctionString);
-    let lowerBound=-4;
-    let upperBound=4;
-    let mx,x0,y0;
-    try{
-        mx=int(entryMx.get());
-    }
-    catch(error){
-        mx=50;
-    }
-    try{
-        x0=float(entryX0.get());
-    }
-    catch(error){
-        x0=GetRandomBetween(lowerBound, upperBound);
-    }
-    try{
-        y0=float(entryY0.get());
-    }
-    catch(error){
-        y0=GetRandomBetween(lowerBound, upperBound);
-    }
+function StartHJ(targetFunction,x0,y0,mx,lowerBound,upperBound){
     let x1,y1,minX,minY;
     let returned = HookeJeeves(x0,y0,mx,targetFunction);
     x1=returned[0];
     y1=returned[1];
     minX=returned[2];
     minY=returned[3];
+    methodIter=returned[4];
+    functionIter=returned[5];
     let fMin=targetFunction(x1,y1); // точка глобального минимума
-    let lowerX,upperX,lowerY,upperY;
-    returned=GetAxisBounds(x0,y0,x1,y1);
+    /*returned=GetAxisBounds(x0,y0,x1,y1);
     lowerX=returned[0];
     upperX=returned[1];
     lowerY=returned[2];
-    upperY=returned[3];
+    upperY=returned[3];*/
+    lowerX = lowerY = lowerBound;
+    upperX = upperY = upperBound;
     let X,Y,Z;
     returned=CoordsForContour(lowerX,upperX,lowerY,upperY,targetFunction,minX,minY);
     X=returned[0];
     Y=returned[1];
     Z=returned[2];
     let labelsList = [];
-    let minZ=[];
     for (let i = 0; i < minX.length; i++) {
         labelsList.push(i+1);
-        minZ.push(targetFunction(minX[i],minY[i]));
     }
-    /*X.push(...minX);
-    Y.push(...minY);
-    Z.push(...minZ);*/
-    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList];
+    f0 = targetFunction(x0,y0);
+    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList,methodIter,functionIter,f0];
 }
-function StartSA(selectedFunctionString){
-    let log = document.getElementById("for-debug");
-    log.innerHTML = "SA, "+selectedFunctionString;
-    let targetFunction = GetTargetFunction(selectedFunctionString);
-    let startT,endT,mx,x0,y0;
-    let lowerBound=-4;
-    let upperBound=4;
-    try{
-        startT=float(entryStartT.get());
-    }
-    catch(error){
-        startT=100.0;
-    }
-    try{
-        endT=float(entryEndT.get());
-    }
-    catch(error){
-        endT=0.0001;
-    }
-    try{
-        mx=int(entryMx.get());
-    }
-    catch(error){
-        mx=50;
-    }
-    try{
-        x0=float(entryX0.get());
-    }
-    catch(error){
-        x0=GetRandomBetween(lowerBound, upperBound);
-    }
-    try{
-        y0=float(entryY0.get());
-    }
-    catch(error){
-        y0=GetRandomBetween(lowerBound, upperBound);
-    }
-    let x1,y1,minX,minY;
-    let returned=SimulatedAnnealing(startT,endT,mx,x0,y0,targetFunction);
+function StartSA(targetFunction,x0,y0,startT,endT,maxIter,lowerBound,upperBound){
+    returned=SimulatedAnnealing(startT,endT,maxIter,x0,y0,targetFunction,lowerBound,upperBound);
     x1=returned[0];
     y1=returned[1];
     minX=returned[2];
     minY=returned[3];
-    let fMin=targetFunction(x1,y1);
-    let lowerX,upperX,lowerY,upperY;
-    returned=GetAxisBounds(x0,y0,x1,y1);
+    methodIter=returned[4];
+    functionIter=returned[5];
+    fMin=targetFunction(x1,y1);
+    /*returned=GetAxisBounds(x0,y0,x1,y1);
     lowerX=returned[0];
     upperX=returned[1];
     lowerY=returned[2];
-    upperY=returned[3];
-    let X,Y,Z;
+    upperY=returned[3];*/
+    lowerX = lowerY = lowerBound;
+    upperX = upperY = upperBound;
     returned=CoordsForContour(lowerX,upperX,lowerY,upperY,targetFunction,minX,minY);
     X=returned[0];
     Y=returned[1];
     Z=returned[2];
-    let labelsList = [];
+    labelsList = [];
     for (let i = 0; i < minX.length; i++) {
         labelsList.push(i+1);
     }
-    /*X.push(...minX);
-    Y.push(...minY);
-    Z.push(...minZ);*/
-    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList];   
+    f0 = targetFunction(x0,y0);
+    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList,methodIter,functionIter,f0];   
+}
+
+function StartOptimization(selectedMethodString,selectedFunctionString,x0,y0,maxIter,lowerBound,upperBound){
+    targetFunction = GetTargetFunction(selectedFunctionString);
+    maxIter=parseInt(maxIter);
+    x0=parseFloat(x0.replace(',','.'));
+    y0=parseFloat(y0.replace(',','.'));
+    lowerBound=parseFloat(lowerBound.replace(',','.'));
+    upperBound=parseFloat(upperBound.replace(',','.'));
+    if(isNaN(lowerBound)){
+        lowerBound=-4;
+    }
+    if(isNaN(upperBound)){
+        upperBound=4;
+    }
+    if(isNaN(maxIter)){
+        maxIter=100;
+    }
+    if(isNaN(x0)){
+        x0=GetRandomBetween(lowerBound, upperBound);
+    }
+    if(isNaN(y0)){
+        y0=GetRandomBetween(lowerBound, upperBound);
+    }
+    if (selectedMethodString === "hj"){
+        returned = StartHJ(targetFunction,x0,y0,maxIter,lowerBound,upperBound);
+    }
+    else {
+        let startT=100.0;
+        let endT=0.001;
+        returned = StartSA(targetFunction,x0,y0,startT,endT,maxIter,lowerBound,upperBound);
+    }
+    return returned;
 }

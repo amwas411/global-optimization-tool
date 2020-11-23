@@ -12,7 +12,8 @@
         <form id="interface-container">
             <div id="returned-data">
                 <div id="result"></div>
-                <div id="for-debug"></div>
+                <div id="method-iterations"></div>
+                <div id="function-iterations"></div>
             </div>
             <div id="method-selector-container">
                 <input id="method-hj" type="radio" name="method-selector" value="hj" checked>
@@ -27,12 +28,21 @@
                 <label for="function-bill">Bill function</label>
                 <input id="function-vitte" type="radio" name="function-selector" value="vitte">
                 <label for="function-vitte">Vitte function</label>
+                <input id="function-rosen" type="radio" name="function-selector" value="rosen">
+                <label for="function-rosen">Rosenbrock function</label>
             </div>
-            <!-- <div id="parameter-selector-container">
-                <input type="text" id="params" name="name" required minlength="4" maxlength="8" size="10">
-                <label for="params">params</label>
-                <input type="text" name="name" readonly minlength="4" maxlength="8" size="10">
-            </div> -->
+            <div id="parameter-selector-container">
+                <input id="param-x" type="text" name="param-x" minlength="1" maxlength="8" size="10">
+                <label for="param-x">x0</label>
+                <input id="param-y" type="text" name="param-y" minlength="1" maxlength="8" size="10">
+                <label for="param-y">y0</label>
+                <input id="max-iterations" type="text" name="max-iterations" minlength="1" maxlength="8" size="10">
+                <label for="max-iterations">mx</label>
+                <input id="lower-bound" type="text" name="lower-bound" minlength="1" maxlength="8" size="10">
+                <label for="lower-bound">Lower bound</label>
+                <input id="upper-bound" type="text" name="upper-bound" minlength="1" maxlength="8" size="10">
+                <label for="upper-bound">Upper bound</label>
+            </div>
             <div id="button-container">
                 <button id="button-start" type="button">Start</button>
             </div>
@@ -51,16 +61,23 @@
                 y1=returned[6];
                 fMin=returned[7];
                 labelsList=returned[8];
+                methodIter=returned[9];
+                functionIter=returned[10];
+                f0=returned[11];
                 let resultDiv = document.getElementById("result");
-                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>iterations = "+minX.length;
-                let contourPlot={
+                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>Checked points = "+minX.length;
+                let mDiv = document.getElementById("method-iterations");
+                mDiv.innerHTML="Method iterations = "+methodIter;
+                let fDiv = document.getElementById("function-iterations");
+                fDiv.innerHTML="Function iterations = "+functionIter;
+                let contourData={
                 x:X,
                 y:Y,
                 z:Z,
                 type:"contour",
                 contours: { start: fMin-20, end: fMin+100, size:10 } 
                 };
-                let scatterPlot={
+                let scatterData={
                     x: minX,
                     y: minY,
                     type: "scatter",
@@ -72,31 +89,60 @@
                     textfont: { color: "yellow" },
                     hoverinfo: "x+y+z"
                 };
-                let data = [scatterPlot,contourPlot];
+                let data = [scatterData,contourData];
                 let layout={
                     margin: { t: 10 },
                     hovermode: "closest" };
                 Plotly.newPlot( graphDiv, data,layout);
             }
-            let returned;
+
             let interfaceForm = document.getElementById("interface-container");
             let btnStart = document.getElementById("button-start");
             btnStart.addEventListener("click",function(event){ 
+                let selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound;
                 let data = new FormData(interfaceForm);
                 for (item of data) {
                     if (item[0] === "method-selector"){
                         selectedMethod=item[1];
                     }
                     else {
-                        selectedFunction=item[1];
+                        if (item[0] === "function-selector"){
+                            selectedFunction=item[1];
+                        }
+                        else {
+                            if (item[0] === "param-x"){
+                                x0 = item[1];
+                            }
+                            else {
+                                if (item[0] === "param-y"){
+                                    y0 = item[1];
+                                }
+                                else{
+                                    if (item[0] === "max-iterations"){
+                                        maxIter = item[1];
+                                    }
+                                    else {
+                                        if (item[0] === "lower-bound"){
+                                            lowerBound=item[1];
+                                        }
+                                        else{
+                                            if (item[0] === "upper-bound"){
+                                                upperBound=item[1];
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                if (selectedMethod === "hj"){
-                    returned = StartHJ(selectedFunction);
+                let returned = StartOptimization(selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound);
+                /*if (selectedMethod === "hj"){
+                    returned = StartHJ(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
                 }
                 else {
-                    returned = StartSA(selectedFunction);
-                }
+                    returned = StartSA(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
+                }*/
                 GetPlot(returned);
             });
             
