@@ -1,1 +1,1 @@
-# optimization-visualizer
+# global optimization tool
