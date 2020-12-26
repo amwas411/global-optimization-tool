@@ -3,10 +3,12 @@
     <head>
         <script src="scripts/plotly-latest.min.js"></script>
         <script src="scripts/main.js"></script>
+        <script src="scripts/math.js"></script>
         <link href="styles.css" rel="stylesheet">
         <title>Global optimization project</title>
     </head>
     <body>
+        <!--<a href="one-dimensional-optimization.html">1-dimensional optimization</a>-->
         <div id="plotly-container"></div>
         
         <form id="interface-container">
@@ -17,34 +19,29 @@
             </div>
             <div id="method-selector-container">
                 <input id="method-hj" type="radio" name="method-selector" value="hj" checked>
-                <label for="method-hj">Hooke-Jeeves</label>
+                <label for="method-hj">Метод мультистарта</label>
                 <input id="method-sa" type="radio" name="method-selector" value="sa">
-                <label for="method-sa">Simulated annealing</label>
+                <label for="method-sa">Метод имитации отжига</label>
             </div>
             <div id="function-selector-container">
-                <input id="function-default" type="radio" name="function-selector" value="default" checked>
-                <label for="function-default">Default function</label>
-                <input id="function-bill" type="radio" name="function-selector" value="bill">
-                <label for="function-bill">Bill function</label>
-                <input id="function-vitte" type="radio" name="function-selector" value="vitte">
-                <label for="function-vitte">Vitte function</label>
-                <input id="function-rosen" type="radio" name="function-selector" value="rosen">
-                <label for="function-rosen">Rosenbrock function</label>
+                <label for="function-input">Строка для ввода целевой функции</label>
+                <input id="function-input" type="text" name="function-input" minlength="1" maxlength="100" size="100">
             </div>
             <div id="parameter-selector-container">
-                <input id="param-x" type="text" name="param-x" minlength="1" maxlength="8" size="10">
+
                 <label for="param-x">x0</label>
-                <input id="param-y" type="text" name="param-y" minlength="1" maxlength="8" size="10">
+                <input id="param-x" type="text" name="param-x" minlength="1" maxlength="8" size="10">
                 <label for="param-y">y0</label>
+                <input id="param-y" type="text" name="param-y" minlength="1" maxlength="8" size="10">
+                <label for="max-iterations">Количество итераций</label>
                 <input id="max-iterations" type="text" name="max-iterations" minlength="1" maxlength="8" size="10">
-                <label for="max-iterations">mx</label>
+                <label for="lower-bound">Нижняя граница</label>
                 <input id="lower-bound" type="text" name="lower-bound" minlength="1" maxlength="8" size="10">
-                <label for="lower-bound">Lower bound</label>
+                <label for="upper-bound">Верхняя граница</label>
                 <input id="upper-bound" type="text" name="upper-bound" minlength="1" maxlength="8" size="10">
-                <label for="upper-bound">Upper bound</label>
             </div>
             <div id="button-container">
-                <button id="button-start" type="button">Start</button>
+                <button id="button-start" type="button">Запуск</button>
             </div>
         </form>
         
@@ -65,11 +62,11 @@
                 functionIter=returned[10];
                 f0=returned[11];
                 let resultDiv = document.getElementById("result");
-                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>Checked points = "+minX.length;
+                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>Просмотрено точек: "+minX.length;
                 let mDiv = document.getElementById("method-iterations");
-                mDiv.innerHTML="Method iterations = "+methodIter;
+                mDiv.innerHTML="Итераций метода: "+methodIter;
                 let fDiv = document.getElementById("function-iterations");
-                fDiv.innerHTML="Function iterations = "+functionIter;
+                fDiv.innerHTML="Вычислений целевой функции: "+functionIter;
                 let contourData={
                 x:X,
                 y:Y,
@@ -106,7 +103,7 @@
                         selectedMethod=item[1];
                     }
                     else {
-                        if (item[0] === "function-selector"){
+                        if (item[0] === "function-input"){
                             selectedFunction=item[1];
                         }
                         else {
@@ -136,6 +133,8 @@
                         }
                     }
                 }
+                //funcString='18 * 3 * x - 18 * x - 12 * x * y + 8 * y * y - 12 * y'
+                
                 let returned = StartOptimization(selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound);
                 /*if (selectedMethod === "hj"){
                     returned = StartHJ(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
