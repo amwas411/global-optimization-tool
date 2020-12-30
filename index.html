@@ -135,7 +135,8 @@
                     }
                 }
                 //funcString='18 * 3 * x - 18 * x - 12 * x * y + 8 * y * y - 12 * y'
-                
+                str='y+3xy+x';
+                node = math.parse(str)
                 let returned = StartOptimization(selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound);
                 /*if (selectedMethod === "hj"){
                     returned = StartHJ(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
