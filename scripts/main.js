@@ -427,16 +427,22 @@ function StartOptimization(selectedMethodString,objectiveFunctionString,startPoi
     objectiveFunctionString=objectiveFunctionString.replace(/,/g,'.');
     objectiveFunction = ParseFunction(objectiveFunctionString,DIM);
     maxIter=parseInt(maxIter);
-    lowerBound=parseFloat(lowerBound.replace(',','.'));
-    upperBound=parseFloat(upperBound.replace(',','.'));
+    
+    
     switch (DIM) {
         case 1:
             if(isNaN(lowerBound)){
                 lowerBound=startPoint[0] - 4;
             }
+            else{
+                lowerBound=parseFloat(lowerBound.replace(',','.'));
+            }
             if(isNaN(upperBound)){
                 upperBound=startPoint[0] + 4;
-            }    
+            }
+            else{
+                upperBound=parseFloat(upperBound.replace(',','.'));
+            }
             break;
         case 2:
             let bound;
@@ -449,9 +455,16 @@ function StartOptimization(selectedMethodString,objectiveFunctionString,startPoi
             if(isNaN(lowerBound)){
                 lowerBound=bound - 4;
             }
+            else{
+                lowerBound=parseFloat(lowerBound.replace(',','.'));
+            }
             if(isNaN(upperBound)){
                 upperBound=bound + 4;
-            }   
+            }
+            
+            else{
+                upperBound=parseFloat(upperBound.replace(',','.'));
+            }
             break;
         default:
             break;
