@@ -431,13 +431,13 @@ function StartOptimization(selectedMethodString,objectiveFunctionString,startPoi
     
     switch (DIM) {
         case 1:
-            if(isNaN(lowerBound)){
+            if(lowerBound==''){
                 lowerBound=startPoint[0] - 4;
             }
             else{
                 lowerBound=parseFloat(lowerBound.replace(',','.'));
             }
-            if(isNaN(upperBound)){
+            if(upperBound==''){
                 upperBound=startPoint[0] + 4;
             }
             else{
@@ -452,16 +452,15 @@ function StartOptimization(selectedMethodString,objectiveFunctionString,startPoi
             else{
                 bound = startPoint[1];
             }
-            if(isNaN(lowerBound)){
+            if(lowerBound==''){
                 lowerBound=bound - 4;
             }
             else{
                 lowerBound=parseFloat(lowerBound.replace(',','.'));
             }
-            if(isNaN(upperBound)){
+            if(upperBound==''){
                 upperBound=bound + 4;
             }
-            
             else{
                 upperBound=parseFloat(upperBound.replace(',','.'));
             }
