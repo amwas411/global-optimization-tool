@@ -1,5 +1,4 @@
-functionDimension = 2;
-function DefaultFunc(x1,x2) {
+/*function DefaultFunc(x1,x2) {
     return 18 * x1 * x1 - 18 * x1 - 12 * x1 * x2 + 8 * x2 * x2 - 12 * x2;
 }
 function BillsFunc(x1,x2) {
@@ -16,68 +15,67 @@ function VittesFunc(x1,x2) {
     return o+e;
 }
 function RosenbrockFunc(x1,x2){
-    return 100*(x2 - x1**2)**2 + (1 - x1)**2;
+    return 100*(x2 - x1^2)^2 + (1 - x1)^2;
+}*/
+function IntitializeStartPoint(startPoint){
+    var x = {x1:0,x2:0,x3:0,x4:0,x5:0,x6:0,x7:0,x8:0,x9:0};
+    let i = 0;
+    for (const property in x) {
+        x[property] = startPoint[i];
+        i++;
+        if (i >= DIM){
+            break;
+        }
+    }
+    return x;
 }
-function HookeJeeves (x1,x2,mx,f) {
-    let minX=[];
-    let minY=[];
-    minX.push(x1);
-    minY.push(x2);
-    let n=2;
-    let functionIter = 0;
-    let x = {x1:x1, x2: x2};
-    let y=f.evaluate(x);
-    functionIter++;
-    let methodIter = 0;
-    let d=1;
-    let eps=1e-2;
+function HookeJeeves (x,maxIter,f) {
+    var checkedPoints = [];
+    checkedPoints.push(Object.values(x).slice(0,DIM));
+    var y = f.evaluate(x);
+    var functionIterations = 1;
+    var methodIterations = 0;
+    var d = 1;
+    var eps = 1e-2;
 
-    while ((d > eps) && (methodIter < mx)) {
+    while ((d > eps) && (methodIterations < maxIter)) {
         let fl=false;
-        let sign = 1;
-        for (let i = 0; i<n;i++) {   
-            if (i!==0) {
-                sign=-1;
-            }
-            x1=x1+sign*d;
-            x = {x1:x1, x2: x2};
-            let fX=f.evaluate(x);
-            functionIter++;
-            if (fX < y){
-                y=fX;
-                fl=true;
-                minX.push(x1);
-                minY.push(x2);
-            }
-            else{
-                x1=x1-sign*d;
-            }
-        }
-        sign = 1;
-        for (let i = 0; i<n;i++) {   
-            if (i!==0){
-                sign=-1;
-            }
-            x2=x2+sign*d;
-            x = {x1:x1, x2: x2};
-            let fX=f.evaluate(x);
-            functionIter++;
-            if (fX < y){
-                y=fX;
-                fl=true;
-                minX.push(x1);
-                minY.push(x2);
-            }
-            else{
-                x2=x2-sign*d;
+        let i = 0;
+        for (const property in x) {
+            let xi = x[property];
+            
+            let sign = 1;
+            //j<2 to check left and right 
+            for (let j = 0; j<2;j++) {   
+                if (j!==0) {
+                    sign=-1;
+                }
+                xi=xi+sign*d;
+                x[property] = xi;
+                let fX=f.evaluate(x);
+                functionIterations++;
+                if (fX < y){
+                    y=fX;
+                    fl=true;
+                    checkedPoints.push(Object.values(x).slice(0,DIM));
+                }
+                else{
+                    xi=xi-sign*d;
+                    x[property] = xi;
+                }
+            }           
+            i++;
+            if (i >= DIM){
+                break;
             }
         }
+
         if (fl===false){
             d=d/2;
         }
-        methodIter++;
+        methodIterations++;
     }
-    return [x1,x2,minX,minY,methodIter,functionIter];
+    return [checkedPoints,methodIterations,functionIterations,y];
 }
 function GetProbability(E,T){
     return Math.exp(-E/T);
@@ -96,58 +94,42 @@ function DecreaseTemperature(T,i){
 function GetRandomBetween(min, max) {
     return Math.random() * (max - min) + min;
 }
-function SimulatedAnnealing(initialTemperature,endT,kMax,x0,y0,f,lowerBound,upperBound){
-    let functionIter = 0;
-    let T, currentEnergy;
-    let x = {x1:x0, x2: y0};
-    let initialEnergy = f.evaluate(x);
-    functionIter++;
-    let minX=[];
-    let minY=[];
+function SimulatedAnnealing(initialTemperature,endT,maxIter,x,f,lowerBound,upperBound){
+    var checkedPoints = [];
+    checkedPoints.push(Object.values(x).slice(0,DIM));
+    let functionIterations = 1;
     let candidateEnergy, p;
-    //searching square 3x3 with center in (x0,y0)
-    /*let lowerX = x0 - 1.5;
-    let upperX = x0 + 1.5;
-    let lowerY = y0 - 1.5;
-    let upperY = y0 + 1.5;*/
-    let lowerX = lowerY = lowerBound;
-    let upperX = upperY = upperBound;
-    
-    T=initialTemperature;
-    currentEnergy=initialEnergy;
-    minX=[];
-    minY=[];
-    minX.push(x0);
-    minY.push(y0);
-    for (var i = 0; i<kMax;i++) {  
-        x1 = GetRandomBetween(lowerX, upperX);
-        y1 = GetRandomBetween(lowerY, upperY);
-        x = {x1:x1, x2: y1};
+    let T=initialTemperature, currentEnergy=f.evaluate(x);
+    for (var methodIterations = 0; methodIterations<maxIter;methodIterations++) {  
+        let i = 0;
+        for (const property in x) {
+            x[property]=GetRandomBetween(lowerBound, upperBound);
+            i++;
+            if (i >= DIM){
+                break;
+            }
+        }
         candidateEnergy = f.evaluate(x);
-        functionIter++;
+        functionIterations++;
         if (candidateEnergy<currentEnergy-1e-8){
             currentEnergy=candidateEnergy;
-            minX.push(x1);
-            minY.push(y1);
+            checkedPoints.push(Object.values(x).slice(0,DIM));
         }
         else {
             p=GetProbability(candidateEnergy-currentEnergy,T);
             if (MakeChange(p)===true){
                 currentEnergy=candidateEnergy;
-                minX.push(x1);
-                minY.push(y1);
+                checkedPoints.push(Object.values(x).slice(0,DIM));
             }
         }
-        T=DecreaseTemperature(initialTemperature,i);
+        T=DecreaseTemperature(initialTemperature,methodIterations);
         if (T < endT+1e-8){
             break;
         }
     }
-    x1 = minX[minX.length - 1];
-    y1 = minY[minY.length - 1];
-    return [x1,y1,minX,minY,i,functionIter];
+    return [checkedPoints,methodIterations,functionIterations,currentEnergy];
 }
-function GetAxisBounds(x0,y0,x1,y1){
+/*function GetAxisBounds(x0,y0,x1,y1){
     let eps=1e-8;
     let shiftingValue = 3;
     let lowerX,upperX,lowerY,upperY;
@@ -168,95 +150,90 @@ function GetAxisBounds(x0,y0,x1,y1){
         upperY = y1+shiftingValue;
     }
     return [lowerX,upperX,lowerY,upperY];
-}
-function GetNumbersBetween(lowerBound,upperBound,quantity){
-    let range = new Array(quantity);
-    let step = Math.abs((upperBound-lowerBound))/quantity;
-    idx=0;
+}*/
+function GetNumbersBetween(lowerBound,upperBound,N){
+    var range = new Array(N);
+    var step = Math.abs((upperBound-lowerBound))/N;
+    var idx = 0;
     for (let i = lowerBound; i < upperBound - 1e-8; i+=step) {
         range[idx] = i;
         idx++;
     }
     return range;
 }
-function CoordsForContour(lowerX,upperX,lowerY,upperY,f,minX,minY){
-    let quantity = 200;
-    let X = GetNumbersBetween(lowerX, upperX, quantity);
-    let Y = GetNumbersBetween(lowerY, upperY, quantity);
-    X.push(...minX);
-    Y.push(...minY);
-    quantity = X.length;
-    X.sort(function(a,b){
-        return a-b;
-    });
-    Y.sort(function(a,b){
-        return a-b;
-    });
-    let Z = new Array(quantity);
-    for (let i = 0; i < quantity; i++) {
-        Z[i]=new Array(quantity);
-        
+function CoordsForContour(lowerBound,upperBound,objectiveFunction,checkedPoints){
+    var N = 200; //quantity
+    var X = [];
+    for (let i = 0; i < DIM; i++) {
+        let Xi = GetNumbersBetween(lowerBound, upperBound, N);
+        X.push(Xi);
     }
-    let x={};
-    for (let i = 0; i < quantity; i++) {
-        for (let j = 0; j < quantity; j++) {
-            x = {x1:X[i], x2: Y[j]};
-            Z[j][i]=f.evaluate(x);//rows - Yaxis, cols - Xaxis in plotly contour
+    
+    for (const point of checkedPoints) {
+        for (let j = 0; j < DIM; j++) {
+            X[j].push(point[j]);
         }
     }
-    return [X,Y,Z];
+    for (let i = 0; i < DIM; i++) {
+        X[i].sort(function(a,b){
+            return a-b;
+        });
+    }
+    N+=checkedPoints.length;
+    if (DIM == 2){
+        var Z = new Array(N);
+        for (let i = 0; i < N; i++) {
+            Z[i]=new Array(N);
+        }
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++) {
+                var x = {x1:X[0][i], x2: X[1][j]};
+                Z[j][i]=objectiveFunction.evaluate(x);//rows - Yaxis, cols - Xaxis in plotly contour
+            }
+        }
+    }
+    else{
+        var Z = [];
+        for (let i = 0; i < N; i++) {
+            var x = {x1:X[0][i]};
+            Z.push(objectiveFunction.evaluate(x));//rows - Yaxis, cols - Xaxis in plotly contour
+        }
+    }
+    return [X,Z];
 }
 
-function StartHJ(targetFunction,x0,y0,mx,lowerBound,upperBound){
-    let x1,y1,minX,minY;
-    let returned = HookeJeeves(x0,y0,mx,targetFunction);
-    x1=returned[0];
-    y1=returned[1];
-    minX=returned[2];
-    minY=returned[3];
-    methodIter=returned[4];
-    functionIter=returned[5];
-    let x = {x1:x1, x2: y1};
-    let fMin=targetFunction.evaluate(x); // точка глобального минимума
-    lowerX = lowerY = lowerBound;
-    upperX = upperY = upperBound;
-    let X,Y,Z;
-    returned=CoordsForContour(lowerX,upperX,lowerY,upperY,targetFunction,minX,minY);
-    X=returned[0];
-    Y=returned[1];
-    Z=returned[2];
-    let labelsList = [];
-    for (let i = 0; i < minX.length; i++) {
-        labelsList.push(i+1);
+function GetValuesForPlot(objectiveFunction,lowerBound,upperBound,checkedPoints){
+    var X,Z,labelsList;
+    if (DIM <= 2){
+        returned=CoordsForContour(lowerBound,upperBound,objectiveFunction,checkedPoints);
+        X=returned[0];
+        Z=returned[1];
+        labelsList = [];
+        for (let i = 0; i < checkedPoints.length; i++) {
+            labelsList.push(i+1);
+        }
     }
-    x = {x1:x0, x2: y0};
-    let f0=targetFunction.evaluate(x); 
-    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList,methodIter,functionIter,f0];
-}
-function StartSA(targetFunction,x0,y0,startT,endT,maxIter,lowerBound,upperBound){
-    returned=SimulatedAnnealing(startT,endT,maxIter,x0,y0,targetFunction,lowerBound,upperBound);
-    x1=returned[0];
-    y1=returned[1];
-    minX=returned[2];
-    minY=returned[3];
-    methodIter=returned[4];
-    functionIter=returned[5];
-    x = {x1:x1, x2: y1};
-    fMin = targetFunction.evaluate(x);
+    //checkedPoints transposed
+    var checkedPointsT=[];
+    for(let i = 0; i < DIM; i++) {
+        checkedPointsT[i] = new Array(checkedPoints.length);
+    }
 
-    lowerX = lowerY = lowerBound;
-    upperX = upperY = upperBound;
-    returned=CoordsForContour(lowerX,upperX,lowerY,upperY,targetFunction,minX,minY);
-    X=returned[0];
-    Y=returned[1];
-    Z=returned[2];
-    labelsList = [];
-    for (let i = 0; i < minX.length; i++) {
-        labelsList.push(i+1);
+    for (let i = 0; i < checkedPoints.length; i++) {
+        let point = checkedPoints[i];
+        for (let j = 0; j < DIM; j++) {
+            checkedPointsT[j][i] = point[j];
+        }
     }
-    x = {x1:x0, x2: y0};
-    f0 = targetFunction.evaluate(x);
-    return [X,Y,Z,minX,minY,x1,y1,fMin,labelsList,methodIter,functionIter,f0];   
+    //compute function values on the search line
+    if (DIM == 1){
+        checkedPointsT[1] = new Array(checkedPointsT[0].length);
+        for (let i = 0; i < checkedPointsT[0].length; i++) {
+            let x = {x1: checkedPointsT[0][i],x2:0};
+            checkedPointsT[1][i] = objectiveFunction.evaluate(x);
+        }
+    }
+    return [X,Z,checkedPointsT,labelsList];   
 }
 //difference = set - subset
 function SetSubtraction(setA,setB){
@@ -307,10 +284,11 @@ function ParseProduction(symbols){
     return dict;
 }
 function CreateTree(functionString) {
-    let node=math.parse(functionString);
-    let constants = new Set(['pi','e','i']);
-    let functions=new Set(['sin','cos','tan','cot','exp','abs','sqrt','sign','log']);
-    let symbols=new Set();
+    var node = math.parse(functionString);
+    var constants = new Set(['pi','e','E','i','PI']);
+    var functions = new Set(['sin','cos','tan','cot','exp','abs','sqrt','sign','log',
+        'log10','log2','nthRoot','acos','acot','asin','atan','sec']);
+    var symbols = new Set();
     node.traverse(function (node) {
         if (node.isSymbolNode) {
             symbols.add(node.name);
@@ -332,7 +310,7 @@ function isAlphaNumeric(char){
         return true;
     }
 }
-function ParseFunction(functionString) {
+function ParseFunction(functionString,DIM) {
     try {
         //create tree
         let returned = CreateTree(functionString);
@@ -340,10 +318,9 @@ function ParseFunction(functionString) {
         let symbols = returned[1];
         let functions = returned[2];
         let constants = returned[3];
-        //get names of variables
+        //get variables
         symbols = SetSubtraction(symbols,SetUnion(constants,functions));
-        //mapping open brackets
-        //if string contains open bracket then do mapping
+        //Open brackets mapping. If string contains open bracket then do mapping
         if (functionString.indexOf('(') != -1){
             let indexStart = 0;
             if (functionString.charAt(0) == '('){
@@ -374,7 +351,7 @@ function ParseFunction(functionString) {
             symbols = SetSubtraction(symbols,SetUnion(constants,functions));
         }
         //mapping and recreating the tree considering that 'xy' -> 'x*y'
-        if (symbols.size > functionDimension) {
+        if (symbols.size > DIM) {
             var prodDict = ParseProduction(symbols);
             for (const key of prodDict.keys()) {
                 let regex = new RegExp(key,'g');
@@ -389,7 +366,7 @@ function ParseFunction(functionString) {
         }
         //renaming the variables to the hardcoded names 'x1','x2'
         let symbols_sorted=Array.from(symbols).sort();
-        let symbols_new=['x1','x2'];
+        let symbols_new=['x1','x2','x3','x4','x5','x6','x7','x8','x9'];
         if (symbols_sorted != symbols_new){
             let dict=new Map();
             for (let i = 0; i < symbols_sorted.length; i++) {
@@ -417,36 +394,107 @@ function ParseFunction(functionString) {
         return 0;
     }
 }
-function StartOptimization(selectedMethodString,selectedFunctionString,x0,y0,maxIter,lowerBound,upperBound){
-    selectedFunctionString=selectedFunctionString.replace(/,/g,'.');
-    targetFunction = ParseFunction(selectedFunctionString);
+function StartOptimization(selectedMethodString,objectiveFunctionString,startPoint,maxIter,lowerBound,upperBound){
+    //A start point must be inside a pair of square brackets. Allowed split symbols are ',' or ';'
+
+    if (startPoint.charAt(0) == '[' && startPoint.charAt(startPoint.length-1) == ']'){
+        startPoint = startPoint.slice(1,startPoint.length-1);
+        let splitSymbol='';
+        if (startPoint.indexOf(',') != -1){
+            splitSymbol = ',';
+        }
+        //if string contains ',' and ';' symbols then splitSymbol is ';'
+        if(startPoint.indexOf(';') != -1){
+            splitSymbol = ';';
+        }
+        if (splitSymbol!=''){
+            startPoint = startPoint.split(splitSymbol);
+        }
+        else{
+            let point = parseFloat(startPoint);
+            startPoint = [];
+            startPoint.push(point);
+        }
+    }
+    else{
+        alert("[ and ] is not found");
+    }
+    DIM = startPoint.length; 
+    for (let i = 0; i < DIM; i++) {
+        startPoint[i] = parseFloat(startPoint[i]);
+    }
+    
+    objectiveFunctionString=objectiveFunctionString.replace(/,/g,'.');
+    objectiveFunction = ParseFunction(objectiveFunctionString,DIM);
     maxIter=parseInt(maxIter);
-    x0=parseFloat(x0.replace(',','.'));
-    y0=parseFloat(y0.replace(',','.'));
     lowerBound=parseFloat(lowerBound.replace(',','.'));
     upperBound=parseFloat(upperBound.replace(',','.'));
-    if(isNaN(lowerBound)){
-        lowerBound=-4;
-    }
-    if(isNaN(upperBound)){
-        upperBound=4;
+    switch (DIM) {
+        case 1:
+            if(isNaN(lowerBound)){
+                lowerBound=startPoint[0] - 4;
+            }
+            if(isNaN(upperBound)){
+                upperBound=startPoint[0] + 4;
+            }    
+            break;
+        case 2:
+            let bound;
+            if (startPoint[0]>startPoint[1]){
+                bound = startPoint[0];
+            }
+            else{
+                bound = startPoint[1];
+            }
+            if(isNaN(lowerBound)){
+                lowerBound=bound - 4;
+            }
+            if(isNaN(upperBound)){
+                upperBound=bound + 4;
+            }   
+            break;
+        default:
+            break;
     }
     if(isNaN(maxIter)){
         maxIter=100;
     }
-    if(isNaN(x0)){
-        x0=GetRandomBetween(lowerBound, upperBound);
-    }
-    if(isNaN(y0)){
-        y0=GetRandomBetween(lowerBound, upperBound);
-    }
+    var x = IntitializeStartPoint(startPoint);
     if (selectedMethodString === "hj"){
-        returned = StartHJ(targetFunction,x0,y0,maxIter,lowerBound,upperBound);
+        var returned = HookeJeeves(x,maxIter,objectiveFunction);
     }
     else {
-        let startT=100.0;
-        let endT=0.001;
-        returned = StartSA(targetFunction,x0,y0,startT,endT,maxIter,lowerBound,upperBound);
+        if (selectedMethodString === "sa"){
+            let startT=100.0;
+            let endT=0.001;
+            var returned=SimulatedAnnealing(startT,endT,maxIter,x,objectiveFunction,lowerBound,upperBound);
+        }
     }
-    return returned;
+    {//send back
+        if (DIM <= 2) {
+            let checkedPoints,methodIterations, functionIterations, fMin;
+            checkedPoints = returned[0];
+            methodIterations = returned[1]; 
+            functionIterations = returned[2];
+            fMin = returned[3];
+            let xMin = checkedPoints[checkedPoints.length-1];
+            returned = GetValuesForPlot(objectiveFunction,lowerBound,upperBound,checkedPoints);
+            returned.push(methodIterations);
+            returned.push(functionIterations);
+            returned.push(fMin);
+            returned.push(xMin);
+            returned.push(DIM);
+        }
+        else{
+            let checkedPoints,methodIterations, functionIterations, fMin;
+            checkedPoints = returned[0];
+            methodIterations = returned[1]; 
+            functionIterations = returned[2];
+            fMin = returned[3];
+            let xMin = checkedPoints[checkedPoints.length-1];
+            returned.push(xMin);
+            returned.push(DIM);
+        }
+        return returned;
+    }
 }
