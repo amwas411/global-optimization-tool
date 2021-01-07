@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src="scripts/plotly-latest.min.js"></script>
-        <script src="scripts/math.js"></script>
-        <script src="scripts/main.js"></script>
-        
+        <script src="scripts/plotly-latest.min.js" defer></script>
+        <script src="scripts/main.js" defer></script>
+        <script src="scripts/math.js" defer></script>
         <link href="styles.css" rel="stylesheet">
         <title>Global optimization project</title>
     </head>
@@ -26,20 +25,22 @@
             </div>
             <div id="function-selector-container">
                 <label for="function-input">Строка для ввода целевой функции</label>
-                <input id="function-input" type="text" name="function-input" minlength="1" maxlength="100" size="100">
+                <input id="function-input" type="text" name="function-input" size="100">
             </div>
             <div id="parameter-selector-container">
-
-                <label for="param-x">x0</label>
-                <input id="param-x" type="text" name="param-x" minlength="1" maxlength="8" size="10">
-                <label for="param-y">y0</label>
-                <input id="param-y" type="text" name="param-y" minlength="1" maxlength="8" size="10">
-                <label for="max-iterations">Количество итераций</label>
-                <input id="max-iterations" type="text" name="max-iterations" minlength="1" maxlength="8" size="10">
-                <label for="lower-bound">Нижняя граница</label>
-                <input id="lower-bound" type="text" name="lower-bound" minlength="1" maxlength="8" size="10">
-                <label for="upper-bound">Верхняя граница</label>
-                <input id="upper-bound" type="text" name="upper-bound" minlength="1" maxlength="8" size="10">
+                <div>
+                    <label for="coords">Координаты начальной точки</label>
+                    <input id="coords" type="text" name="coords" size="50">
+                </div><div>
+                    <label for="max-iterations">Количество итераций</label>
+                    <input id="max-iterations" type="text" name="max-iterations" size="10">
+                </div><div>
+                    <label for="lower-bound">Нижняя граница</label>
+                    <input id="lower-bound" type="text" name="lower-bound" size="10">
+                </div><div>
+                    <label for="upper-bound">Верхняя граница</label>
+                    <input id="upper-bound" type="text" name="upper-bound" size="10">
+                </div>
             </div>
             <div id="button-container">
                 <button id="button-start" type="button">Запуск</button>
@@ -47,47 +48,58 @@
         </form>
         
         <script>
-            function GetPlot(returned){
-                let graphDiv=document.getElementById("plotly-container");
-                let X,Y,Z,minX,minY,x1,y1,fMin,labelsList,minZ;
-                X=returned[0];
-                Y=returned[1];
-                Z=returned[2];
-                minX=returned[3];
-                minY=returned[4];
-                x1=returned[5];
-                y1=returned[6];
-                fMin=returned[7];
-                labelsList=returned[8];
-                methodIter=returned[9];
-                functionIter=returned[10];
-                f0=returned[11];
+            function FillResults(checkedPointsLength,methodIterations,functionIterations,fMin,xMin){
                 let resultDiv = document.getElementById("result");
-                resultDiv.innerHTML="x = "+x1+"<br>y = "+y1+"<br>z = "+fMin+"<br>Просмотрено точек: "+minX.length;
+                resultDiv.innerHTML="xMin = "+xMin+"<br>fMin = "+fMin+"<br>Просмотрено точек: "+checkedPointsLength;
                 let mDiv = document.getElementById("method-iterations");
-                mDiv.innerHTML="Итераций метода: "+methodIter;
+                mDiv.innerHTML="Итераций метода: "+methodIterations;
                 let fDiv = document.getElementById("function-iterations");
-                fDiv.innerHTML="Вычислений целевой функции: "+functionIter;
-                let contourData={
-                x:X,
-                y:Y,
-                z:Z,
-                type:"contour",
-                contours: { start: fMin-20, end: fMin+100, size:10 } 
-                };
+                fDiv.innerHTML="Вычислений целевой функции: "+functionIterations;
+            }
+            function GetPlot(X,Z,labelsList,checkedPoints,fMin){
+                let graphDiv=document.getElementById("plotly-container");
+                console.log(checkedPoints);
                 let scatterData={
-                    x: minX,
-                    y: minY,
+                    x: checkedPoints[0],
+                    y: checkedPoints[1],
                     type: "scatter",
                     line: { color: "red" },
                     marker: { width: 5 },
                     text: labelsList,
                     textposition: "top center",
-                    mode:'lines+markers+text',
-                    textfont: { color: "yellow" },
-                    hoverinfo: "x+y+z"
+                    mode:"lines+markers+text",
+                    textfont: { color: "black" },
+                    hoverinfo: "x+y+z",
+                    name:"Search trace"
                 };
+                switch (DIM) {
+                    case 1:
+                        var contourData={
+                            x: X[0],
+                            y: Z,
+                            type: "scatter",
+                            line: { color: "black" },
+                            marker: { width: 5 },
+                            hoverinfo: "x+y",
+                            name:"Objective function"
+                        }; 
+                        break;
+                    case 2:
+                        var contourData={
+                            x:X[0],
+                            y:X[1],
+                            z:Z,
+                            type:"contour",
+                            contours: { start: fMin-20, end: fMin+100, size:10 },
+                            name:"Contour plot"
+                        };   
+                        
+                        break;
+                    default:
+                        break;
+                }
                 let data = [scatterData,contourData];
+                
                 let layout={
                     margin: { t: 10 },
                     hovermode: "closest" };
@@ -97,7 +109,7 @@
             let interfaceForm = document.getElementById("interface-container");
             let btnStart = document.getElementById("button-start");
             btnStart.addEventListener("click",function(event){ 
-                let selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound;
+                let selectedMethod,objectiveFunction,startPoint,maxIter,lowerBound,upperBound;
                 let data = new FormData(interfaceForm);
                 for (item of data) {
                     if (item[0] === "method-selector"){
@@ -105,28 +117,23 @@
                     }
                     else {
                         if (item[0] === "function-input"){
-                            selectedFunction=item[1];
+                            objectiveFunction=item[1];
                         }
                         else {
-                            if (item[0] === "param-x"){
-                                x0 = item[1];
+                            if (item[0] === "coords"){
+                                startPoint = item[1];
                             }
                             else {
-                                if (item[0] === "param-y"){
-                                    y0 = item[1];
+                                if (item[0] === "max-iterations"){
+                                    maxIter = item[1];
                                 }
-                                else{
-                                    if (item[0] === "max-iterations"){
-                                        maxIter = item[1];
+                                else {
+                                    if (item[0] === "lower-bound"){
+                                        lowerBound=item[1];
                                     }
-                                    else {
-                                        if (item[0] === "lower-bound"){
-                                            lowerBound=item[1];
-                                        }
-                                        else{
-                                            if (item[0] === "upper-bound"){
-                                                upperBound=item[1];
-                                            }
+                                    else{
+                                        if (item[0] === "upper-bound"){
+                                            upperBound=item[1];
                                         }
                                     }
                                 }
@@ -134,17 +141,37 @@
                         }
                     }
                 }
-                //funcString='18 * 3 * x - 18 * x - 12 * x * y + 8 * y * y - 12 * y'
+                //the next two lines are needed to enable the math.js library
                 str='y+3xy+x';
                 node = math.parse(str)
-                let returned = StartOptimization(selectedMethod,selectedFunction,x0,y0,maxIter,lowerBound,upperBound);
-                /*if (selectedMethod === "hj"){
-                    returned = StartHJ(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
+                
+                let returned = StartOptimization(selectedMethod,objectiveFunction,startPoint,maxIter,lowerBound,upperBound);
+                if (returned.length == 9){
+                    let X,Z,checkedPointsT,labelsList,methodIterations,functionIterations,fMin,xMin;
+                    X=returned[0];
+                    Z=returned[1];
+                    checkedPointsT=returned[2];
+                    labelsList=returned[3];
+                    methodIterations = returned[4];
+                    functionIterations=returned[5];
+                    fMin = returned[6];
+                    xMin = returned[7];
+                    DIM = returned[8];
+                    GetPlot(X,Z,labelsList,checkedPointsT,fMin);
+                    FillResults(checkedPointsT[0].length,methodIterations,functionIterations,fMin,xMin);
+
                 }
-                else {
-                    returned = StartSA(selectedFunction,x0,y0,iterationsBound,lowerBound,upperBound);
-                }*/
-                GetPlot(returned);
+                else{
+                    let checkedPoints,methodIterations,functionIterations,fMin,xMin;
+                    checkedPoints=returned[0];
+                    methodIterations = returned[1];
+                    functionIterations=returned[2];
+                    fMin = returned[3];
+                    xMin = returned[4];
+                    DIM = returned[5];
+                    FillResults(checkedPoints.length,methodIterations,functionIterations,fMin,xMin);
+                }
+                
             });
             
         </script>
