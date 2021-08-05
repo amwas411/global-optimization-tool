@@ -11,7 +11,7 @@ var parametersList = [];
 
 const Plot = createPlotlyComponent(Plotly);
 const rowsData = [
-  { id: "objectiveFunction", name: "Целевая функция", required: "required", pattern: "[a-zA-Z0-9 +/.*^()-]+" },
+  { id: "objectiveFunction", name: "Ц", required: "required", pattern: "[a-zA-Z0-9 +/.*^()-]+" },
   { id: "lowerBound", name: "Нижняя граница", required: "required", pattern: "[pie\\d .,;\\[\\]-]+" },
   { id: "upperBound", name: "Верхняя граница", required: "required", pattern: "[pie\\d .,;\\[\\]-]+" }
 ];
