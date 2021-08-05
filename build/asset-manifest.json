@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/static/css/main.315717b9.chunk.css",
-    "main.js": "/static/js/main.97ae11f1.chunk.js",
-    "main.js.map": "/static/js/main.97ae11f1.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.fda4d6a4.js",
-    "runtime-main.js.map": "/static/js/runtime-main.fda4d6a4.js.map",
-    "static/js/2.29661aca.chunk.js": "/static/js/2.29661aca.chunk.js",
-    "static/js/2.29661aca.chunk.js.map": "/static/js/2.29661aca.chunk.js.map",
-    "static/js/3.2ccdcad8.chunk.js": "/static/js/3.2ccdcad8.chunk.js",
-    "static/js/3.2ccdcad8.chunk.js.map": "/static/js/3.2ccdcad8.chunk.js.map",
-    "index.html": "/index.html",
-    "static/css/main.315717b9.chunk.css.map": "/static/css/main.315717b9.chunk.css.map",
-    "static/js/2.29661aca.chunk.js.LICENSE.txt": "/static/js/2.29661aca.chunk.js.LICENSE.txt"
+    "main.css": "/pavelyarkov/global-optimization-tool/static/css/main.315717b9.chunk.css",
+    "main.js": "/pavelyarkov/global-optimization-tool/static/js/main.97ae11f1.chunk.js",
+    "main.js.map": "/pavelyarkov/global-optimization-tool/static/js/main.97ae11f1.chunk.js.map",
+    "runtime-main.js": "/pavelyarkov/global-optimization-tool/static/js/runtime-main.9a770109.js",
+    "runtime-main.js.map": "/pavelyarkov/global-optimization-tool/static/js/runtime-main.9a770109.js.map",
+    "static/js/2.29661aca.chunk.js": "/pavelyarkov/global-optimization-tool/static/js/2.29661aca.chunk.js",
+    "static/js/2.29661aca.chunk.js.map": "/pavelyarkov/global-optimization-tool/static/js/2.29661aca.chunk.js.map",
+    "static/js/3.2ccdcad8.chunk.js": "/pavelyarkov/global-optimization-tool/static/js/3.2ccdcad8.chunk.js",
+    "static/js/3.2ccdcad8.chunk.js.map": "/pavelyarkov/global-optimization-tool/static/js/3.2ccdcad8.chunk.js.map",
+    "index.html": "/pavelyarkov/global-optimization-tool/index.html",
+    "static/css/main.315717b9.chunk.css.map": "/pavelyarkov/global-optimization-tool/static/css/main.315717b9.chunk.css.map",
+    "static/js/2.29661aca.chunk.js.LICENSE.txt": "/pavelyarkov/global-optimization-tool/static/js/2.29661aca.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.fda4d6a4.js",
+    "static/js/runtime-main.9a770109.js",
     "static/js/2.29661aca.chunk.js",
     "static/css/main.315717b9.chunk.css",
     "static/js/main.97ae11f1.chunk.js"
