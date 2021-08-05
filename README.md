@@ -18,4 +18,4 @@ Requirements: node.js packet manager (npm).
 
 "npm start" will create a local server at localhost:3000. Now you may change files in "src" folder and immediatly see result at the local server.
 
-To build project run command "npm run-script build". If you want to make a pull request, you should pull all content of the "pavelyarkov.github.io" folder which was created when you cloned the repository.
+To build project run command "npm run-script build".
