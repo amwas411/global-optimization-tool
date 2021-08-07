@@ -29,6 +29,6 @@ Requirements: node.js packet manager (npm).
 3. Install dependencies by executing "npm install" in terminal;
 4. "npm start" to start development. 
 
-"npm start" will create a local server at localhost:3000. Now you may change files in "src" folder and immediatly see result at the local server.
+"npm start" will create a local server at localhost:3000. Now you may change files in "src" folder and immediately see result at the local server.
 
 To build project you should run command "npm run-script build".
