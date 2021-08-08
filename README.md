@@ -2,14 +2,7 @@
 # Global optimization tool
 https://pavelyarkov.github.io/global-optimization-tool/
 
-This is a tool that enables you to take the global minimum of the given function.
-
-Released methods:
-1) Hooke-Jeeves method (optionally with multistart method);
-2) Swarm optimization;
-3) Simulated annealing (SA);
-4) Genetic algorithm;
-5) Tabu-Search method (optionally with my modification which includes SA in the algorithm).
+cludes SA in the algorithm).
 	
 A function should be of no more than 9 different variables. 
 	
