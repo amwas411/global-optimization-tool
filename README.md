@@ -1,7 +1,5 @@
 
 # Global optimization tool
-Web-site: https://pavelyarkov.github.io/global-optimization-tool/
-
 This is a tool that enables you to take the global minimum of the given function. Create using JavaScript and React.
 
 Released methods:
